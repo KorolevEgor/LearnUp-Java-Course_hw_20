@@ -1,11 +1,14 @@
 package ru.korolyovegor.LearnUp_Java_Course_hw_20.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Component
 public class PremiereService {
 
     ArrayList<Premiere> premiereList;
@@ -49,7 +52,7 @@ public class PremiereService {
         }
     }
 
-    public Ticket buyTicket(Premiere premiereBuy) {
+    public Ticket buyTicket(@org.jetbrains.annotations.NotNull Premiere premiereBuy) {
         UUID id = premiereBuy.getId();
         for (Premiere premiere : premiereList) {
             if (premiere.getId().equals(id)) {
@@ -75,5 +78,18 @@ public class PremiereService {
                 }
             }
         }
+    }
+
+    @Scheduled(cron = "${interval-in-cron-free-seat}")
+    public ArrayList<Integer> freeSeat() {
+        ArrayList<Integer> result = new ArrayList<>();
+        for (Premiere premiere : premiereList) {
+            if (premiere.isFreeSeat()) {
+                result.add(premiere.getQuantityOfSeats() - premiere.getSeatsUsed());
+            } else {
+                result.add(0);
+            }
+        }
+        return result;
     }
 }

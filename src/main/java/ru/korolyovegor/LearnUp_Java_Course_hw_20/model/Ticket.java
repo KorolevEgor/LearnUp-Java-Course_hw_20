@@ -13,4 +13,12 @@ public class Ticket {
     private UUID id;
     private Premiere premiere;
     private String place;
+
+    @Override
+    public String toString() {
+        return "Ticket{" +
+                "id=" + id +
+                ", place='" + place + '\'' +
+                '}';
+    }
 }

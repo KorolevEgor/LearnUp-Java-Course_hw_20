@@ -1,18 +1,30 @@
 package ru.korolyovegor.LearnUp_Java_Course_hw_20;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.PropertySource;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.service.PremiereService;
 
 import java.util.UUID;
 
 @SpringBootApplication
-public class LearnUpJavaCourseHw20Application {
+public class LearnUpJavaCourseHw20Application implements CommandLineRunner {
+
+	@Autowired
+	private ApplicationContext context;
 
 	public static void main(String[] args) {
 		SpringApplication.run(LearnUpJavaCourseHw20Application.class, args);
-		PremiereService ps = new PremiereService();
+	}
+
+	@Override
+	public void run(String... args) {
+		PremiereService ps = context.getBean(PremiereService.class);
 
 		System.out.println("----------------------------");
 		ps.read();
@@ -54,8 +66,19 @@ public class LearnUpJavaCourseHw20Application {
 		ps.readById(p.getId());
 		System.out.println("----------------------------");
 
-		ps.delete(p.getId());
-		ps.read();
+//		ps.delete(p.getId());
+//		ps.read();
+
+		Ticket t = ps.buyTicket(p);
+		System.out.println("----------------------------");
+
+		ps.refundTicket(p);
+		System.out.println("----------------------------");
+
+		ps.buyTicket(p);
+		System.out.println("----------------------------");
+
+		System.out.println(ps.freeSeat());
 	}
 
 }
