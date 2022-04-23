@@ -1,6 +1,7 @@
 package ru.korolyovegor.LearnUp_Java_Course_hw_20.service;
 
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -44,6 +45,34 @@ public class PremiereService {
         for (Premiere premiere : premiereList) {
             if (premiere.getId().equals(id)) {
                 System.out.println(premiere);
+            }
+        }
+    }
+
+    public Ticket buyTicket(Premiere premiereBuy) {
+        UUID id = premiereBuy.getId();
+        for (Premiere premiere : premiereList) {
+            if (premiere.getId().equals(id)) {
+                if (premiere.isFreeSeat()) {
+                    premiere.book();
+                    return Ticket.builder()
+                            .id(UUID.randomUUID())
+                            .premiere(premiereBuy)
+                            .place("12A-30").build();
+                }
+            }
+        }
+        return null;
+    }
+
+    public void refundTicket(Premiere premiereRefund) {
+        UUID id = premiereRefund.getId();
+        for (Premiere premiere : premiereList) {
+            if (premiere.getId().equals(id)) {
+                if (premiere.isFreeSeat()) {
+                    premiere.unband();
+                    return;
+                }
             }
         }
     }

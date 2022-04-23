@@ -15,6 +15,19 @@ public class Premiere {
     private String description;
     private int ageCategory;
     private int quantityOfSeats;
+    private int seatsUsed = 0;
+
+    public boolean isFreeSeat() {
+        return seatsUsed < quantityOfSeats;
+    }
+
+    public void book() {
+        seatsUsed++;
+    }
+
+    public void unband() {
+        seatsUsed--;
+    }
 
     @Override
     public String toString() {
