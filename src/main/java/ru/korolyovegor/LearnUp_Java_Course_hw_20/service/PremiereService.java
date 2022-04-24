@@ -3,6 +3,8 @@ package ru.korolyovegor.LearnUp_Java_Course_hw_20.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.dao.PremiereDAO;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.dao.TicketDAO;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
@@ -26,27 +28,46 @@ public class PremiereService {
 //        premiereList = new ArrayList<>();
 //    }
 
+    @Transactional(
+            timeout = 1
+    )
     public void insert(Premiere premiere) {
         premiereDAO.save(premiere);
     }
 
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ,
+            timeout = 1
+    )
     public void update(Premiere premiere) {
         premiereDAO.deleteById(premiere.getId());
         premiereDAO.save(premiere);
     }
 
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ
+    )
     public void delete(UUID id) {
         premiereDAO.deleteById(id);
     }
 
+    @Transactional(
+            isolation = Isolation.READ_COMMITTED,
+            readOnly = true
+    )
     public void read() {
         premiereDAO.findAll().forEach(System.out::println);
     }
 
+    @Transactional(
+            isolation = Isolation.READ_COMMITTED,
+            readOnly = true
+    )
     public void readById(UUID id) {
         System.out.println(premiereDAO.findById(id));
     }
 
+    @Transactional
     public Ticket buyTicket(@org.jetbrains.annotations.NotNull Premiere premiereBuy) {
         Ticket t = null;
         if (premiereBuy.isFreeSeat()) {
@@ -61,6 +82,7 @@ public class PremiereService {
         return t;
     }
 
+    @Transactional
     public void refundTicket(Premiere premiereRefund) {
         UUID id = premiereRefund.getId();
 
