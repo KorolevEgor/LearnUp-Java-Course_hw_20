@@ -1,7 +1,10 @@
 package ru.korolyovegor.LearnUp_Java_Course_hw_20.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.dao.PremiereDAO;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.dao.TicketDAO;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
 
@@ -11,79 +14,69 @@ import java.util.UUID;
 @Component
 public class PremiereService {
 
-    ArrayList<Premiere> premiereList;
+    @Autowired
+    private PremiereDAO premiereDAO;
 
-    public PremiereService() {
-        premiereList = new ArrayList<>();
-    }
+    @Autowired
+    private TicketDAO ticketDAO;
+
+//    ArrayList<Premiere> premiereList;
+
+//    public PremiereService() {
+//        premiereList = new ArrayList<>();
+//    }
 
     public void insert(Premiere premiere) {
-        if (!premiereList.contains(premiere))
-            premiereList.add(premiere);
+        premiereDAO.save(premiere);
     }
 
     public void update(Premiere premiere) {
-        for (int i = 0; i < premiereList.size(); i++) {
-            if (premiereList.get(i).getId().equals(premiere.getId())) {
-                premiereList.set(i, premiere);
-                break;
-            }
-        }
+        premiereDAO.deleteById(premiere.getId());
+        premiereDAO.save(premiere);
     }
 
     public void delete(UUID id) {
-        for (int i = 0; i < premiereList.size(); i++) {
-            if (premiereList.get(i).getId().equals(id)) {
-                premiereList.remove(i);
-                break;
-            }
-        }
+        premiereDAO.deleteById(id);
     }
 
     public void read() {
-        premiereList.forEach(System.out::println);
+        premiereDAO.findAll().forEach(System.out::println);
     }
 
     public void readById(UUID id) {
-        for (Premiere premiere : premiereList) {
-            if (premiere.getId().equals(id)) {
-                System.out.println(premiere);
-            }
-        }
+        System.out.println(premiereDAO.findById(id));
     }
 
     public Ticket buyTicket(@org.jetbrains.annotations.NotNull Premiere premiereBuy) {
-        UUID id = premiereBuy.getId();
-        for (Premiere premiere : premiereList) {
-            if (premiere.getId().equals(id)) {
-                if (premiere.isFreeSeat()) {
-                    premiere.book();
-                    return Ticket.builder()
-                            .id(UUID.randomUUID())
-                            .premiere(premiereBuy)
-                            .place("12A-30").build();
-                }
-            }
+        Ticket t = null;
+        if (premiereBuy.isFreeSeat()) {
+            premiereBuy.book();
+            update(premiereBuy);
+            t = Ticket.builder()
+                    .id(UUID.randomUUID())
+                    .premiere(premiereBuy)
+                    .place("12A-30").build();
+            ticketDAO.save(t);
         }
-        return null;
+        return t;
     }
 
     public void refundTicket(Premiere premiereRefund) {
         UUID id = premiereRefund.getId();
-        for (Premiere premiere : premiereList) {
-            if (premiere.getId().equals(id)) {
-                if (premiere.isFreeSeat()) {
-                    premiere.unband();
-                    return;
-                }
+
+        for (Ticket ticket : ticketDAO.findAll()) {
+            if (ticket.getPremiere().getId().equals(id)) {
+                ticketDAO.deleteById(ticket.getId());
             }
         }
+        premiereRefund.unband();
+        update(premiereRefund);
     }
 
     @Scheduled(cron = "${interval-in-cron-free-seat}")
     public ArrayList<Integer> freeSeat() {
         ArrayList<Integer> result = new ArrayList<>();
-        for (Premiere premiere : premiereList) {
+        for (Premiere premiere : premiereDAO.findAll()) {
             if (premiere.isFreeSeat()) {
                 result.add(premiere.getQuantityOfSeats() - premiere.getSeatsUsed());
             } else {
