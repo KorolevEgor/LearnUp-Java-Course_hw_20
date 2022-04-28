@@ -7,12 +7,14 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Ticket;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.dto.PremiereDto;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.PremiereRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.TicketRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class PremiereService {
@@ -23,9 +25,14 @@ public class PremiereService {
     private TicketRepository ticketRepository;
     Map<UUID, Ticket> ticketMap = new HashMap<>();
 
-    public PremiereService(@Autowired PremiereRepository premiereRepository, @Autowired TicketRepository ticketRepository) {
+    Mapper mapper;
+
+    public PremiereService(@Autowired PremiereRepository premiereRepository
+            , @Autowired TicketRepository ticketRepository
+            , @Autowired Mapper mapper) {
         this.premiereRepository = premiereRepository;
         this.ticketRepository = ticketRepository;
+        this.mapper = mapper;
 
         for (PremiereEntity premiereEntity : premiereRepository.findAll()) {
             premiereMap.put(premiereEntity.getId(), Premiere.builder()
@@ -55,7 +62,8 @@ public class PremiereService {
     @Transactional(
             timeout = 5
     )
-    public void insert(PremiereEntity premiere) {
+    public void insert(PremiereDto premiereDto) {
+        PremiereEntity premiere = mapper.toEntity(premiereDto);
         premiereRepository.save(premiere);
         premiereMap.put(premiere.getId(), Premiere.builder()
                 .id(premiere.getId())
@@ -70,7 +78,8 @@ public class PremiereService {
             isolation = Isolation.REPEATABLE_READ,
             timeout = 5
     )
-    public void update(PremiereEntity premiere) {
+    public void update(PremiereDto premiereDto) {
+        PremiereEntity premiere = mapper.toEntity(premiereDto);
         premiereMap.remove(premiere.getId());
         premiereMap.put(premiere.getId(), Premiere.builder()
                 .id(premiere.getId())
@@ -100,8 +109,15 @@ public class PremiereService {
     }
 
     @Transactional
-    public List<PremiereEntity> getAll() {
-        return premiereRepository.findAll();
+    public List<PremiereDto> getAll() {
+        return premiereRepository.findAll().stream()
+                .map(mapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PremiereDto getById(UUID id) {
+        return mapper.toDto(premiereRepository.getById(id));
     }
 
     @Transactional(
@@ -118,7 +134,7 @@ public class PremiereService {
         Premiere premiereObj = premiereMap.get(premiereBuy.getId());
         if (premiereObj.isFreeSeat()) {
             premiereObj.book();
-            update(premiereBuy);
+            update(mapper.toDto(premiereBuy));
             t = TicketEntity.builder()
                     .id(UUID.randomUUID())
                     .premiere(premiereBuy)
@@ -145,7 +161,7 @@ public class PremiereService {
             }
         }
         premiereObj.unband();
-        update(premiereRefund);
+        update(mapper.toDto(premiereRefund));
     }
 
     @Scheduled(cron = "${interval-in-cron-free-seat}")

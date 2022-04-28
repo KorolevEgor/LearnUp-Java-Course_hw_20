@@ -1,33 +1,46 @@
 package ru.korolyovegor.LearnUp_Java_Course_hw_20.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.dto.PremiereDto;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.service.Mapper;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.service.PremiereService;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/premieres")
 public class PremiereController {
 
     PremiereService premiereService;
-    Mapper mapper;
 
     @Autowired
-    public PremiereController(PremiereService premiereService, Mapper mapper) {
+    public PremiereController(PremiereService premiereService) {
         this.premiereService = premiereService;
-        this.mapper = mapper;
     }
 
     @GetMapping
     public Collection<PremiereDto> getAllPremieres() {
-        return premiereService.getAll().stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
+        return premiereService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public PremiereDto getPremiere(@PathVariable("id") UUID id) {
+        return premiereService.getById(id);
+    }
+
+    @PostMapping
+    public void insertPremiere(@RequestBody PremiereDto premiereDto) {
+        premiereService.insert(premiereDto);
+    }
+
+    @PutMapping("/{id}")
+    public void updatePremiere(@RequestBody PremiereDto premiereDto, @PathVariable("id") UUID id) {
+        premiereService.update(premiereDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deletePremiere(@PathVariable("id") UUID id) {
+        premiereService.delete(id);
     }
 }

@@ -10,6 +10,7 @@ public interface Mapper {
     PremiereDto toDto(Premiere premiere);
     Premiere toDomain(PremiereDto premiereDto);
     PremiereEntity toEntity(Premiere premiere);
+    PremiereEntity toEntity(PremiereDto premiereDto);
     Premiere toDomain(PremiereEntity premiereEntity);
 
 }
