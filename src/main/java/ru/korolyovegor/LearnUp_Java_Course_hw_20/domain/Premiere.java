@@ -1,43 +1,27 @@
-package ru.korolyovegor.LearnUp_Java_Course_hw_20.model;
+package ru.korolyovegor.LearnUp_Java_Course_hw_20.domain;
 
 import lombok.*;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @EqualsAndHashCode
 @Builder
-@Entity
-@Table(name = "premieres")
+@Getter
+@Setter
 public class Premiere implements Serializable {
-    @Id
-    @Column(name = "id")
-//    @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID id;
-
-    @Column(name = "name")
     private String name;
-
-    @Column(name = "description")
     private String description;
-
-    @Column(name = "age_category")
     private int ageCategory;
-
-    @Column(name = "quantity_of_seats")
     private int quantityOfSeats;
-
-    @Column(name = "seats_used")
     private int seatsUsed = 0;
 
-    @OneToMany(mappedBy = "premiere", fetch = FetchType.LAZY)
-    private Set<Ticket> ticketSet;
+    private Set<TicketEntity> ticketSet;
 
     public boolean isFreeSeat() {
         return seatsUsed < quantityOfSeats;

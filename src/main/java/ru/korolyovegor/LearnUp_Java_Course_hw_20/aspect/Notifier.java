@@ -4,11 +4,10 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.aspectj.lang.annotation.Aspect;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,8 +16,8 @@ import java.util.Date;
 @Aspect
 public class Notifier {
     @Around("execution(public * buyTicket(..))")
-    public Ticket aroundBuyTicketAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        Ticket ticket = (Ticket) proceedingJoinPoint.proceed();
+    public TicketEntity aroundBuyTicketAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        TicketEntity ticket = (TicketEntity) proceedingJoinPoint.proceed();
         System.out.println("[куплен билет]: " + ticket);
 
         return ticket;
@@ -26,7 +25,7 @@ public class Notifier {
 
     @AfterReturning("execution(public * refundTicket(..))")
     public void afterBuyTicketAdvice(JoinPoint JoinPoint) {
-        Premiere premiere = (Premiere) JoinPoint.getArgs()[0];
+        PremiereEntity premiere = (PremiereEntity) JoinPoint.getArgs()[0];
         System.out.println("[билет возвращен на премьеру]: " + premiere);
     }
 

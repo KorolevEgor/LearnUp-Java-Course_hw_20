@@ -5,12 +5,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Premiere;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Ticket;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.PremiereRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.TicketRepository;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -19,8 +23,12 @@ public class PremiereService {
     @Autowired
     private PremiereRepository premiereRepository;
 
+    Map<UUID, Premiere> premiereMap = new HashMap<>();
+
     @Autowired
     private TicketRepository ticketRepository;
+
+    Map<UUID, Ticket> ticketMap = new HashMap<>();
 
 //    ArrayList<Premiere> premiereList;
 
@@ -31,17 +39,32 @@ public class PremiereService {
     @Transactional(
             timeout = 1
     )
-    public void insert(Premiere premiere) {
+    public void insert(PremiereEntity premiere) {
         premiereRepository.save(premiere);
+        premiereMap.put(premiere.getId(), Premiere.builder()
+                .id(premiere.getId())
+                .name(premiere.getName())
+                .description(premiere.getDescription())
+                .ageCategory(premiere.getAgeCategory())
+                .quantityOfSeats(premiere.getQuantityOfSeats())
+                .seatsUsed(premiere.getSeatsUsed()).build());
     }
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
             timeout = 1
     )
-    public void update(Premiere premiere) {
+    public void update(PremiereEntity premiere) {
         premiereRepository.deleteById(premiere.getId());
         premiereRepository.save(premiere);
+        premiereMap.remove(premiere.getId());
+        premiereMap.put(premiere.getId(), Premiere.builder()
+                .id(premiere.getId())
+                .name(premiere.getName())
+                .description(premiere.getDescription())
+                .ageCategory(premiere.getAgeCategory())
+                .quantityOfSeats(premiere.getQuantityOfSeats())
+                .seatsUsed(premiere.getSeatsUsed()).build());
     }
 
     @Transactional(
@@ -49,6 +72,7 @@ public class PremiereService {
     )
     public void delete(UUID id) {
         premiereRepository.deleteById(id);
+        premiereMap.remove(id);
     }
 
     @Transactional(
@@ -68,12 +92,13 @@ public class PremiereService {
     }
 
     @Transactional
-    public Ticket buyTicket(@org.jetbrains.annotations.NotNull Premiere premiereBuy) {
-        Ticket t = null;
-        if (premiereBuy.isFreeSeat()) {
-            premiereBuy.book();
+    public TicketEntity buyTicket(@org.jetbrains.annotations.NotNull PremiereEntity premiereBuy) {
+        TicketEntity t = null;
+        Premiere premiereObj = premiereMap.get(premiereBuy.getId());
+        if (premiereObj.isFreeSeat()) {
+            premiereObj.book();
             update(premiereBuy);
-            t = Ticket.builder()
+            t = TicketEntity.builder()
                     .id(UUID.randomUUID())
                     .premiere(premiereBuy)
                     .place("12A-30").build();
@@ -83,23 +108,24 @@ public class PremiereService {
     }
 
     @Transactional
-    public void refundTicket(Premiere premiereRefund) {
+    public void refundTicket(PremiereEntity premiereRefund) {
         UUID id = premiereRefund.getId();
+        Premiere premiereObj = premiereMap.get(id);
 
-        for (Ticket ticket : ticketRepository.findAll()) {
+        for (TicketEntity ticket : ticketRepository.findAll()) {
             if (ticket.getPremiere().getId().equals(id)) {
                 ticketRepository.deleteById(ticket.getId());
             }
         }
-        premiereRefund.unband();
+        premiereObj.unband();
         update(premiereRefund);
     }
 
     @Scheduled(cron = "${interval-in-cron-free-seat}")
     public ArrayList<Integer> freeSeat() {
         ArrayList<Integer> result = new ArrayList<>();
-        for (Premiere premiere : premiereRepository.findAll()) {
-            if (premiere.isFreeSeat()) {
+        for (PremiereEntity premiere : premiereRepository.findAll()) {
+            if (premiereMap.get(premiere.getId()).isFreeSeat()) {
                 result.add(premiere.getQuantityOfSeats() - premiere.getSeatsUsed());
             } else {
                 result.add(0);

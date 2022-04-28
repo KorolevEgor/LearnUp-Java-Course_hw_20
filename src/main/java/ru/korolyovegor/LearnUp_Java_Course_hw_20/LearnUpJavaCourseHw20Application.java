@@ -5,11 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.service.PremiereService;
-
-import java.util.UUID;
 
 @SpringBootApplication
 public class LearnUpJavaCourseHw20Application implements CommandLineRunner {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public class TicketDto {
     private UUID id;
 
     @JsonProperty
-    private Premiere premiere;
+    private PremiereEntity premiere;
 
     @JsonProperty
     private String place;

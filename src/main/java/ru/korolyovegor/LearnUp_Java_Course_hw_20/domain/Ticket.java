@@ -1,30 +1,20 @@
-package ru.korolyovegor.LearnUp_Java_Course_hw_20.model;
+package ru.korolyovegor.LearnUp_Java_Course_hw_20.domain;
 
 import lombok.*;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @EqualsAndHashCode
 @Builder
-@Entity
-@Table(name = "tickets")
+@Getter
+@Setter
 public class Ticket implements Serializable {
-    @Id
-    @Column(name = "id")
-//    @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "premiere")
-    private Premiere premiere;
-
-    @Column(name = "place")
+    private PremiereEntity premiere;
     private String place;
 
     @Override
