@@ -5,8 +5,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.dao.PremiereDAO;
-import ru.korolyovegor.LearnUp_Java_Course_hw_20.dao.TicketDAO;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.PremiereRepository;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.TicketRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.model.Ticket;
 
@@ -17,10 +17,10 @@ import java.util.UUID;
 public class PremiereService {
 
     @Autowired
-    private PremiereDAO premiereDAO;
+    private PremiereRepository premiereRepository;
 
     @Autowired
-    private TicketDAO ticketDAO;
+    private TicketRepository ticketRepository;
 
 //    ArrayList<Premiere> premiereList;
 
@@ -32,7 +32,7 @@ public class PremiereService {
             timeout = 1
     )
     public void insert(Premiere premiere) {
-        premiereDAO.save(premiere);
+        premiereRepository.save(premiere);
     }
 
     @Transactional(
@@ -40,15 +40,15 @@ public class PremiereService {
             timeout = 1
     )
     public void update(Premiere premiere) {
-        premiereDAO.deleteById(premiere.getId());
-        premiereDAO.save(premiere);
+        premiereRepository.deleteById(premiere.getId());
+        premiereRepository.save(premiere);
     }
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ
     )
     public void delete(UUID id) {
-        premiereDAO.deleteById(id);
+        premiereRepository.deleteById(id);
     }
 
     @Transactional(
@@ -56,7 +56,7 @@ public class PremiereService {
             readOnly = true
     )
     public void read() {
-        premiereDAO.findAll().forEach(System.out::println);
+        premiereRepository.findAll().forEach(System.out::println);
     }
 
     @Transactional(
@@ -64,7 +64,7 @@ public class PremiereService {
             readOnly = true
     )
     public void readById(UUID id) {
-        System.out.println(premiereDAO.findById(id));
+        System.out.println(premiereRepository.findById(id));
     }
 
     @Transactional
@@ -77,7 +77,7 @@ public class PremiereService {
                     .id(UUID.randomUUID())
                     .premiere(premiereBuy)
                     .place("12A-30").build();
-            ticketDAO.save(t);
+            ticketRepository.save(t);
         }
         return t;
     }
@@ -86,9 +86,9 @@ public class PremiereService {
     public void refundTicket(Premiere premiereRefund) {
         UUID id = premiereRefund.getId();
 
-        for (Ticket ticket : ticketDAO.findAll()) {
+        for (Ticket ticket : ticketRepository.findAll()) {
             if (ticket.getPremiere().getId().equals(id)) {
-                ticketDAO.deleteById(ticket.getId());
+                ticketRepository.deleteById(ticket.getId());
             }
         }
         premiereRefund.unband();
@@ -98,7 +98,7 @@ public class PremiereService {
     @Scheduled(cron = "${interval-in-cron-free-seat}")
     public ArrayList<Integer> freeSeat() {
         ArrayList<Integer> result = new ArrayList<>();
-        for (Premiere premiere : premiereDAO.findAll()) {
+        for (Premiere premiere : premiereRepository.findAll()) {
             if (premiere.isFreeSeat()) {
                 result.add(premiere.getQuantityOfSeats() - premiere.getSeatsUsed());
             } else {
