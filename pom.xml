@@ -96,6 +96,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.6.7</version>
 			</plugin>
 
 			<plugin>
@@ -103,7 +104,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.6.1</version>
 				<configuration>
-					<annotationProccessorPaths>
+					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
@@ -114,7 +115,7 @@
 							<artifactId>mapstruct-processor</artifactId>
 							<version>${mapstruct.version}</version>
 						</path>
-					</annotationProccessorPaths>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
