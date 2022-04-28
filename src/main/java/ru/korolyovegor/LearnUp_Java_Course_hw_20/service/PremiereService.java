@@ -2,7 +2,7 @@ package ru.korolyovegor.LearnUp_Java_Course_hw_20.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Premiere;
@@ -16,7 +16,7 @@ import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class PremiereService {
 
     private PremiereRepository premiereRepository;
@@ -62,7 +62,7 @@ public class PremiereService {
     @Transactional(
             timeout = 5
     )
-    public void insert(PremiereDto premiereDto) {
+    public void insertPremiere(PremiereDto premiereDto) {
         PremiereEntity premiere = mapper.toEntity(premiereDto);
         premiereRepository.save(premiere);
         premiereMap.put(premiere.getId(), Premiere.builder()
@@ -78,7 +78,7 @@ public class PremiereService {
             isolation = Isolation.REPEATABLE_READ,
             timeout = 5
     )
-    public void update(PremiereDto premiereDto) {
+    public void updatePremiere(PremiereDto premiereDto) {
         PremiereEntity premiere = mapper.toEntity(premiereDto);
         premiereMap.remove(premiere.getId());
         premiereMap.put(premiere.getId(), Premiere.builder()
@@ -89,13 +89,13 @@ public class PremiereService {
                 .quantityOfSeats(premiere.getQuantityOfSeats())
                 .seatsUsed(premiere.getSeatsUsed()).build());
 //        premiereRepository.deleteById(premiere.getId());
-        premiereRepository.save(premiere);
+//        premiereRepository.save(premiere);
     }
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ
     )
-    public void delete(UUID id) {
+    public void deletePremiere(UUID id) {
         premiereRepository.deleteById(id);
         premiereMap.remove(id);
     }
@@ -109,14 +109,14 @@ public class PremiereService {
     }
 
     @Transactional
-    public List<PremiereDto> getAll() {
+    public List<PremiereDto> getAllPremieres() {
         return premiereRepository.findAll().stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public PremiereDto getById(UUID id) {
+    public PremiereDto getPremiereById(UUID id) {
         return mapper.toDto(premiereRepository.getById(id));
     }
 
@@ -134,7 +134,7 @@ public class PremiereService {
         Premiere premiereObj = premiereMap.get(premiereBuy.getId());
         if (premiereObj.isFreeSeat()) {
             premiereObj.book();
-            update(mapper.toDto(premiereBuy));
+            updatePremiere(mapper.toDto(premiereBuy));
             t = TicketEntity.builder()
                     .id(UUID.randomUUID())
                     .premiere(premiereBuy)
@@ -161,7 +161,7 @@ public class PremiereService {
             }
         }
         premiereObj.unband();
-        update(mapper.toDto(premiereRefund));
+        updatePremiere(mapper.toDto(premiereRefund));
     }
 
     @Scheduled(cron = "${interval-in-cron-free-seat}")

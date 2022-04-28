@@ -21,26 +21,26 @@ public class PremiereController {
 
     @GetMapping
     public Collection<PremiereDto> getAllPremieres() {
-        return premiereService.getAll();
+        return premiereService.getAllPremieres();
     }
 
     @GetMapping("/{id}")
     public PremiereDto getPremiere(@PathVariable("id") UUID id) {
-        return premiereService.getById(id);
+        return premiereService.getPremiereById(id);
     }
 
     @PostMapping
     public void insertPremiere(@RequestBody PremiereDto premiereDto) {
-        premiereService.insert(premiereDto);
+        premiereService.insertPremiere(premiereDto);
     }
 
     @PutMapping("/{id}")
     public void updatePremiere(@RequestBody PremiereDto premiereDto, @PathVariable("id") UUID id) {
-        premiereService.update(premiereDto);
+        premiereService.updatePremiere(premiereDto);
     }
 
     @DeleteMapping("/{id}")
     public void deletePremiere(@PathVariable("id") UUID id) {
-        premiereService.delete(id);
+        premiereService.deletePremiere(id);
     }
 }
