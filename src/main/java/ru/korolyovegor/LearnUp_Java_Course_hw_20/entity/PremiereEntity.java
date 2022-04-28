@@ -38,4 +38,14 @@ public class PremiereEntity {
 
     @OneToMany(mappedBy = "premiere", fetch = FetchType.LAZY)
     private Set<TicketEntity> ticketSet;
+
+    @Override
+    public String toString() {
+        return "Премьера:" +
+                "    название: " + name + '\n' +
+                "    описание: " + description + '\n' +
+                "    возрастное ограничение: " + ageCategory + "+\n" +
+                "    количество мест: " + quantityOfSeats + '\n' +
+                "    (" +  id + ")";
+    }
 }

@@ -5,7 +5,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.service.PremiereService;
+
+import java.util.UUID;
 
 @SpringBootApplication
 public class LearnUpJavaCourseHw20Application implements CommandLineRunner {
@@ -19,13 +23,13 @@ public class LearnUpJavaCourseHw20Application implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		PremiereService ps = context.getBean(PremiereService.class);
-
+//		PremiereService ps = context.getBean(PremiereService.class);
+//
 //		System.out.println("----------------------------");
 //		ps.read();
 //		System.out.println("----------------------------");
 //
-//		ps.insert(Premiere.builder()
+//		ps.insert(PremiereEntity.builder()
 //				.id(UUID.randomUUID())
 //				.name("abc")
 //				.description("qqqwwweeerrr tttyyy")
@@ -35,14 +39,14 @@ public class LearnUpJavaCourseHw20Application implements CommandLineRunner {
 //		ps.read();
 //		System.out.println("----------------------------");
 //
-//		ps.insert(Premiere.builder()
+//		ps.insert(PremiereEntity.builder()
 //				.id(UUID.randomUUID())
 //				.name("def")
 //				.description("31415926535")
 //				.ageCategory(6)
 //				.quantityOfSeats(800)
 //				.build());
-//		Premiere p = Premiere.builder()
+//		PremiereEntity p = PremiereEntity.builder()
 //				.id(UUID.randomUUID())
 //				.name("ghi")
 //				.description("27182818284")
@@ -64,7 +68,7 @@ public class LearnUpJavaCourseHw20Application implements CommandLineRunner {
 ////		ps.delete(p.getId());
 ////		ps.read();
 //
-//		Ticket t = ps.buyTicket(p);
+//		TicketEntity t = ps.buyTicket(p);
 //		System.out.println("----------------------------");
 //
 //		ps.refundTicket(p);

@@ -25,4 +25,12 @@ public class TicketEntity implements Serializable {
 
     @Column(name = "place")
     private String place;
+
+    @Override
+    public String toString() {
+        return "Ticket{" +
+                "id=" + id +
+                ", place='" + place + '\'' +
+                '}';
+    }
 }

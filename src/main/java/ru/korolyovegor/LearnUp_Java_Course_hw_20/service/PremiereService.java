@@ -12,23 +12,39 @@ import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.TicketRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.TicketEntity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class PremiereService {
 
-    @Autowired
     private PremiereRepository premiereRepository;
-
     Map<UUID, Premiere> premiereMap = new HashMap<>();
 
-    @Autowired
     private TicketRepository ticketRepository;
-
     Map<UUID, Ticket> ticketMap = new HashMap<>();
+
+    public PremiereService(@Autowired PremiereRepository premiereRepository, @Autowired TicketRepository ticketRepository) {
+        this.premiereRepository = premiereRepository;
+        this.ticketRepository = ticketRepository;
+
+        for (PremiereEntity premiereEntity : premiereRepository.findAll()) {
+            premiereMap.put(premiereEntity.getId(), Premiere.builder()
+                    .id(premiereEntity.getId())
+                    .name(premiereEntity.getName())
+                    .description(premiereEntity.getDescription())
+                    .ageCategory(premiereEntity.getAgeCategory())
+                    .quantityOfSeats(premiereEntity.getQuantityOfSeats())
+                    .seatsUsed(premiereEntity.getSeatsUsed()).build());
+        }
+
+        for (TicketEntity ticketEntity : ticketRepository.findAll()) {
+            ticketMap.put(ticketEntity.getId(), Ticket.builder()
+                    .id(ticketEntity.getId())
+                    .place(ticketEntity.getPlace())
+                    .premiere(ticketEntity.getPremiere())
+                    .build());
+        }
+    }
 
 //    ArrayList<Premiere> premiereList;
 
@@ -37,7 +53,7 @@ public class PremiereService {
 //    }
 
     @Transactional(
-            timeout = 1
+            timeout = 5
     )
     public void insert(PremiereEntity premiere) {
         premiereRepository.save(premiere);
@@ -52,11 +68,9 @@ public class PremiereService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            timeout = 1
+            timeout = 5
     )
     public void update(PremiereEntity premiere) {
-        premiereRepository.deleteById(premiere.getId());
-        premiereRepository.save(premiere);
         premiereMap.remove(premiere.getId());
         premiereMap.put(premiere.getId(), Premiere.builder()
                 .id(premiere.getId())
@@ -65,6 +79,8 @@ public class PremiereService {
                 .ageCategory(premiere.getAgeCategory())
                 .quantityOfSeats(premiere.getQuantityOfSeats())
                 .seatsUsed(premiere.getSeatsUsed()).build());
+//        premiereRepository.deleteById(premiere.getId());
+        premiereRepository.save(premiere);
     }
 
     @Transactional(
@@ -81,6 +97,11 @@ public class PremiereService {
     )
     public void read() {
         premiereRepository.findAll().forEach(System.out::println);
+    }
+
+    @Transactional
+    public List<PremiereEntity> getAll() {
+        return premiereRepository.findAll();
     }
 
     @Transactional(
@@ -103,18 +124,24 @@ public class PremiereService {
                     .premiere(premiereBuy)
                     .place("12A-30").build();
             ticketRepository.save(t);
+            ticketMap.remove(t.getId());
+            ticketMap.put(t.getId(), Ticket.builder()
+                    .id(t.getId())
+                    .place(t.getPlace())
+                    .premiere(t.getPremiere()).build());
         }
         return t;
     }
 
     @Transactional
-    public void refundTicket(PremiereEntity premiereRefund) {
+    public void refundTicket(@org.jetbrains.annotations.NotNull PremiereEntity premiereRefund) {
         UUID id = premiereRefund.getId();
         Premiere premiereObj = premiereMap.get(id);
 
         for (TicketEntity ticket : ticketRepository.findAll()) {
             if (ticket.getPremiere().getId().equals(id)) {
                 ticketRepository.deleteById(ticket.getId());
+                ticketMap.remove(ticket.getId());
             }
         }
         premiereObj.unband();
