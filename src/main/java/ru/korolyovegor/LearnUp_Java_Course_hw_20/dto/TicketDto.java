@@ -16,7 +16,7 @@ public class TicketDto {
     private UUID id;
 
     @JsonProperty
-    private PremiereEntity premiere;
+    private UUID premiereId;
 
     @JsonProperty
     private String place;

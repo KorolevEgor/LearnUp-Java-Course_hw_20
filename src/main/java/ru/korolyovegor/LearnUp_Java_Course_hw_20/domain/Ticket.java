@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 public class Ticket implements Serializable {
     private UUID id;
-    private PremiereEntity premiere;
+    private UUID premiereId;
     private String place;
 
     @Override

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Ticket;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.dto.PremiereDto;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.dto.TicketDto;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.PremiereRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.TicketRepository;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.entity.PremiereEntity;
@@ -48,7 +49,7 @@ public class PremiereService {
             ticketMap.put(ticketEntity.getId(), Ticket.builder()
                     .id(ticketEntity.getId())
                     .place(ticketEntity.getPlace())
-                    .premiere(ticketEntity.getPremiere())
+                    .premiereId(ticketEntity.getPremiere().getId())
                     .build());
         }
     }
@@ -75,6 +76,18 @@ public class PremiereService {
     }
 
     @Transactional(
+            timeout = 5
+    )
+    public void insertTicket(TicketDto ticketDto) {
+        TicketEntity ticket = mapper.toEntity(ticketDto);
+        ticketRepository.save(ticket);
+        ticketMap.put(ticket.getId(), Ticket.builder()
+                .id(ticket.getId())
+                .place(ticket.getPlace())
+                .premiereId(ticket.getPremiere().getId()).build());
+    }
+
+    @Transactional(
             isolation = Isolation.REPEATABLE_READ,
             timeout = 5
     )
@@ -88,8 +101,27 @@ public class PremiereService {
                 .ageCategory(premiere.getAgeCategory())
                 .quantityOfSeats(premiere.getQuantityOfSeats())
                 .seatsUsed(premiere.getSeatsUsed()).build());
+
+        // добавить проверку на то, что нет ссылок из tickets на запись premiereEntity
 //        premiereRepository.deleteById(premiere.getId());
-//        premiereRepository.save(premiere);
+        premiereRepository.save(premiere);
+    }
+
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ,
+            timeout = 5
+    )
+    public void updateTicket(TicketDto ticketDto) {
+        TicketEntity ticket = mapper.toEntity(ticketDto);
+        ticketMap.remove(ticket.getId());
+        ticketMap.put(ticket.getId(), Ticket.builder()
+                .id(ticket.getId())
+                .place(ticket.getPlace())
+                .premiereId(ticket.getPremiere().getId()).build());
+
+        // добавить проверку на то, что нет ссылок из tickets на запись premiereEntity
+//        ticketRepository.deleteById(ticket.getId());
+        ticketRepository.save(ticket);
     }
 
     @Transactional(
@@ -101,10 +133,18 @@ public class PremiereService {
     }
 
     @Transactional(
+            isolation = Isolation.REPEATABLE_READ
+    )
+    public void deleteTicket(UUID id) {
+        ticketRepository.deleteById(id);
+        ticketMap.remove(id);
+    }
+
+    @Transactional(
             isolation = Isolation.READ_COMMITTED,
             readOnly = true
     )
-    public void read() {
+    public void printAllPremieres() {
         premiereRepository.findAll().forEach(System.out::println);
     }
 
@@ -116,8 +156,20 @@ public class PremiereService {
     }
 
     @Transactional
+    public List<TicketDto> getAllTickets() {
+        return ticketRepository.findAll().stream()
+                .map(mapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public PremiereDto getPremiereById(UUID id) {
         return mapper.toDto(premiereRepository.getById(id));
+    }
+
+    @Transactional
+    public TicketDto getTicketById(UUID id) {
+        return mapper.toDto(ticketRepository.getById(id));
     }
 
     @Transactional(
@@ -144,7 +196,7 @@ public class PremiereService {
             ticketMap.put(t.getId(), Ticket.builder()
                     .id(t.getId())
                     .place(t.getPlace())
-                    .premiere(t.getPremiere()).build());
+                    .premiereId(t.getPremiere().getId()).build());
         }
         return t;
     }
