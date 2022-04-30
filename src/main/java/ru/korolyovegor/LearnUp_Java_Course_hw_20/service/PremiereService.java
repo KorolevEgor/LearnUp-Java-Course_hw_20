@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 @Service
 public class PremiereService {
 
-    private PremiereRepository premiereRepository;
-    private Map<UUID, Premiere> premiereMap = new HashMap<>();
+    private final PremiereRepository premiereRepository;
+    private final Map<UUID, Premiere> premiereMap = new HashMap<>();
 
-    private TicketRepository ticketRepository;
-    private Map<UUID, Ticket> ticketMap = new HashMap<>();
+    private final TicketRepository ticketRepository;
+    private final Map<UUID, Ticket> ticketMap = new HashMap<>();
 
     Mapper mapper;
 
@@ -54,13 +54,6 @@ public class PremiereService {
         }
     }
 
-//    ArrayList<Premiere> premiereList;
-
-//    public PremiereService() {
-//        premiereList = new ArrayList<>();
-//    }
-
-
     @Transactional(
             timeout = 5
     )
@@ -80,15 +73,18 @@ public class PremiereService {
             timeout = 5
     )
     public void insertTicket(TicketDto ticketDto) {
-        TicketEntity ticket = TicketEntity.builder()
-                .id(ticketDto.getId())
-                .premiere(premiereRepository.findById(ticketDto.getPremiereId()).get())
-                .place(ticketDto.getPlace()).build();
+        PremiereEntity premiereEntity = premiereRepository.findById(ticketDto.getPremiereId()).get();
+        TicketEntity ticket = mapper.toEntity(ticketDto, premiereRepository);
         ticketRepository.save(ticket);
         ticketMap.put(ticket.getId(), Ticket.builder()
                 .id(ticket.getId())
                 .place(ticket.getPlace())
                 .premiere(ticket.getPremiere().getId()).build());
+
+        premiereEntity.setSeatsUsed(premiereEntity.getSeatsUsed() + 1);
+        premiereRepository.save(premiereEntity);
+        Premiere premiere = premiereMap.get(premiereEntity.getId());
+        premiere.setSeatsUsed(premiere.getSeatsUsed() + 1);
     }
 
     @Transactional(
@@ -107,7 +103,6 @@ public class PremiereService {
                 .seatsUsed(premiere.getSeatsUsed()).build());
 
         // добавить проверку на то, что нет ссылок из tickets на запись premiereEntity
-//        premiereRepository.deleteById(premiere.getId());
         premiereRepository.save(premiere);
     }
 
@@ -116,10 +111,7 @@ public class PremiereService {
             timeout = 5
     )
     public void updateTicket(TicketDto ticketDto) {
-        TicketEntity ticket = TicketEntity.builder()
-                .id(ticketDto.getId())
-                .premiere(premiereRepository.findById(ticketDto.getPremiereId()).get())
-                .place(ticketDto.getPlace()).build();
+        TicketEntity ticket = mapper.toEntity(ticketDto, premiereRepository);
         ticketMap.remove(ticket.getId());
         ticketMap.put(ticket.getId(), Ticket.builder()
                 .id(ticket.getId())
@@ -127,7 +119,6 @@ public class PremiereService {
                 .premiere(ticket.getPremiere().getId()).build());
 
         // добавить проверку на то, что нет ссылок из tickets на запись premiereEntity
-//        ticketRepository.deleteById(ticket.getId());
         ticketRepository.save(ticket);
     }
 
@@ -143,6 +134,13 @@ public class PremiereService {
             isolation = Isolation.REPEATABLE_READ
     )
     public void deleteTicket(UUID id) {
+        TicketEntity ticketEntity = ticketRepository.findById(id).get();
+        PremiereEntity premiereEntity = premiereRepository.getById(ticketEntity.getPremiere().getId());
+        premiereEntity.setSeatsUsed(premiereEntity.getSeatsUsed() - 1);
+        premiereRepository.save(premiereEntity);
+        Premiere premiere = premiereMap.get(premiereEntity.getId());
+        premiere.setSeatsUsed(premiere.getSeatsUsed() - 1);
+
         ticketRepository.deleteById(id);
         ticketMap.remove(id);
     }
@@ -166,17 +164,9 @@ public class PremiereService {
     public List<TicketDto> getAllTickets() {
         List<TicketDto> ticketDtoList = new ArrayList<>();
         for (TicketEntity ticket : ticketRepository.findAll()) {
-            ticketDtoList.add(TicketDto.builder()
-                    .id(ticket.getId())
-                    .premiereId(ticket.getPremiere().getId())
-                    .place(ticket.getPlace()).build());
+            ticketDtoList.add(mapper.toDto(ticket, ticketRepository));
         }
-
         return ticketDtoList;
-
-//        return ticketRepository.findAll().stream()
-//                .map(mapper::toDto)
-//                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -186,7 +176,8 @@ public class PremiereService {
 
     @Transactional
     public TicketDto getTicketById(UUID id) {
-        return mapper.toDto(ticketRepository.getById(id));
+        TicketEntity ticketEntity = ticketRepository.findById(id).get();
+        return mapper.toDto(ticketEntity, ticketRepository);
     }
 
     @Transactional(
@@ -214,6 +205,10 @@ public class PremiereService {
                     .id(t.getId())
                     .place(t.getPlace())
                     .premiere(t.getPremiere().getId()).build());
+            PremiereEntity premiereEntity = premiereRepository.getById(premiereObj.getId());
+            premiereEntity.setSeatsUsed(premiereEntity.getSeatsUsed() + 1);
+            premiereRepository.save(premiereEntity);
+            premiereObj.setSeatsUsed(premiereObj.getSeatsUsed() + 1);
         }
         return t;
     }
