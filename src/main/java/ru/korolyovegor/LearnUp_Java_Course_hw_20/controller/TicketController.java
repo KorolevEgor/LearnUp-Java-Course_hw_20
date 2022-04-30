@@ -40,6 +40,6 @@ public class TicketController {
 
     @DeleteMapping("/{id}")
     public void deleteTicket(@PathVariable("id") UUID id) {
-        premiereService.deletePremiere(id);
+        premiereService.deleteTicket(id);
     }
 }

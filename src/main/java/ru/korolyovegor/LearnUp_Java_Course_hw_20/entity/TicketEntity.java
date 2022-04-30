@@ -16,7 +16,7 @@ import java.util.UUID;
 public class TicketEntity implements Serializable {
     @Id
     @Column(name = "id")
-//    @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
+    @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

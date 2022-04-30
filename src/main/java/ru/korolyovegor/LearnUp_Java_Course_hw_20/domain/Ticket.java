@@ -14,8 +14,16 @@ import java.util.UUID;
 @Setter
 public class Ticket implements Serializable {
     private UUID id;
-    private UUID premiereId;
+    private UUID premiere;
     private String place;
+
+    public UUID getPremiere() {
+        return premiere;
+    }
+
+    public void setPremiere(UUID premiere) {
+        this.premiere = premiere;
+    }
 
     @Override
     public String toString() {

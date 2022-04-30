@@ -17,11 +17,26 @@ public interface Mapper {
     Premiere toDomain(PremiereEntity premiereEntity);
 
 
-    TicketDto toDto(TicketEntity ticketEntity);
+//    TicketDto toDto(TicketEntity ticketEntity);
+    public default TicketDto toDto(TicketEntity ticketEntity) {
+        if ( ticketEntity == null ) {
+            return null;
+        }
+
+        TicketDto ticketDto = new TicketDto();
+
+        ticketDto.setId( ticketEntity.getId() );
+        ticketDto.setPremiereId(ticketEntity.getId());
+        ticketDto.setPlace( ticketEntity.getPlace() );
+
+        return ticketDto;
+    }
+
+
     TicketDto toDto(Ticket ticket);
     Ticket toDomain(TicketDto ticketDto);
-    TicketEntity toEntity(Ticket ticket);
-    TicketEntity toEntity(TicketDto ticketDto);
-    Ticket toDomain(TicketEntity ticketEntity);
+//    TicketEntity toEntity(Ticket ticket);
+//    TicketEntity toEntity(TicketDto ticketDto);
+//    Ticket toDomain(TicketEntity ticketEntity);
 
 }

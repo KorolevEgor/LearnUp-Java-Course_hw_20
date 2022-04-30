@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 public class PremiereService {
 
     private PremiereRepository premiereRepository;
-    Map<UUID, Premiere> premiereMap = new HashMap<>();
+    private Map<UUID, Premiere> premiereMap = new HashMap<>();
 
     private TicketRepository ticketRepository;
-    Map<UUID, Ticket> ticketMap = new HashMap<>();
+    private Map<UUID, Ticket> ticketMap = new HashMap<>();
 
     Mapper mapper;
 
@@ -49,7 +49,7 @@ public class PremiereService {
             ticketMap.put(ticketEntity.getId(), Ticket.builder()
                     .id(ticketEntity.getId())
                     .place(ticketEntity.getPlace())
-                    .premiereId(ticketEntity.getPremiere().getId())
+                    .premiere(ticketEntity.getPremiere().getId())
                     .build());
         }
     }
@@ -59,6 +59,7 @@ public class PremiereService {
 //    public PremiereService() {
 //        premiereList = new ArrayList<>();
 //    }
+
 
     @Transactional(
             timeout = 5
@@ -79,12 +80,18 @@ public class PremiereService {
             timeout = 5
     )
     public void insertTicket(TicketDto ticketDto) {
-        TicketEntity ticket = mapper.toEntity(ticketDto);
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        System.out.println(ticketDto);
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        TicketEntity ticket = TicketEntity.builder()
+                .id(ticketDto.getId())
+                .premiere(premiereRepository.findById(ticketDto.getPremiereId()).get())
+                .place(ticketDto.getPlace()).build();
         ticketRepository.save(ticket);
         ticketMap.put(ticket.getId(), Ticket.builder()
                 .id(ticket.getId())
                 .place(ticket.getPlace())
-                .premiereId(ticket.getPremiere().getId()).build());
+                .premiere(ticket.getPremiere().getId()).build());
     }
 
     @Transactional(
@@ -112,12 +119,15 @@ public class PremiereService {
             timeout = 5
     )
     public void updateTicket(TicketDto ticketDto) {
-        TicketEntity ticket = mapper.toEntity(ticketDto);
+        TicketEntity ticket = TicketEntity.builder()
+                .id(ticketDto.getId())
+                .premiere(premiereRepository.findById(ticketDto.getPremiereId()).get())
+                .place(ticketDto.getPlace()).build();
         ticketMap.remove(ticket.getId());
         ticketMap.put(ticket.getId(), Ticket.builder()
                 .id(ticket.getId())
                 .place(ticket.getPlace())
-                .premiereId(ticket.getPremiere().getId()).build());
+                .premiere(ticket.getPremiere().getId()).build());
 
         // добавить проверку на то, что нет ссылок из tickets на запись premiereEntity
 //        ticketRepository.deleteById(ticket.getId());
@@ -157,9 +167,19 @@ public class PremiereService {
 
     @Transactional
     public List<TicketDto> getAllTickets() {
-        return ticketRepository.findAll().stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
+        List<TicketDto> ticketDtoList = new ArrayList<>();
+        for (TicketEntity ticket : ticketRepository.findAll()) {
+            ticketDtoList.add(TicketDto.builder()
+                    .id(ticket.getId())
+                    .premiereId(ticket.getPremiere().getId())
+                    .place(ticket.getPlace()).build());
+        }
+
+        return ticketDtoList;
+
+//        return ticketRepository.findAll().stream()
+//                .map(mapper::toDto)
+//                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -196,7 +216,7 @@ public class PremiereService {
             ticketMap.put(t.getId(), Ticket.builder()
                     .id(t.getId())
                     .place(t.getPlace())
-                    .premiereId(t.getPremiere().getId()).build());
+                    .premiere(t.getPremiere().getId()).build());
         }
         return t;
     }
@@ -207,7 +227,7 @@ public class PremiereService {
         Premiere premiereObj = premiereMap.get(id);
 
         for (TicketEntity ticket : ticketRepository.findAll()) {
-            if (ticket.getPremiere().getId().equals(id)) {
+            if (ticket.getPremiere().equals(id)) {
                 ticketRepository.deleteById(ticket.getId());
                 ticketMap.remove(ticket.getId());
             }
