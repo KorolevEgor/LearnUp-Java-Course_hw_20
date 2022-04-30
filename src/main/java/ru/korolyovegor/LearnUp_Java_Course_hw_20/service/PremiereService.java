@@ -80,9 +80,6 @@ public class PremiereService {
             timeout = 5
     )
     public void insertTicket(TicketDto ticketDto) {
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        System.out.println(ticketDto);
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         TicketEntity ticket = TicketEntity.builder()
                 .id(ticketDto.getId())
                 .premiere(premiereRepository.findById(ticketDto.getPremiereId()).get())
