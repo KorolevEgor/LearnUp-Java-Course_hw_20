@@ -12,7 +12,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/tickets")
 public class TicketController {
-    TicketService ticketService;
+    private final TicketService ticketService;
 
     @Autowired
     public TicketController(TicketService ticketService) {

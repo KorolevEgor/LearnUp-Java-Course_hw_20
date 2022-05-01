@@ -26,7 +26,7 @@ public class PremiereService {
     private final TicketRepository ticketRepository;
     private final Map<UUID, Ticket> ticketMap = new HashMap<>();
 
-    Mapper mapper;
+    private final Mapper mapper;
 
     public PremiereService(@Autowired PremiereRepository premiereRepository
             , @Autowired TicketRepository ticketRepository

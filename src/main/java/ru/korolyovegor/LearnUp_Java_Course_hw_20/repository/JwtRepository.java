@@ -4,7 +4,7 @@ public interface JwtRepository {
 
     void save(String username, String token);
 
-    String get(String token);
+    String get(String username);
 
 
 }
