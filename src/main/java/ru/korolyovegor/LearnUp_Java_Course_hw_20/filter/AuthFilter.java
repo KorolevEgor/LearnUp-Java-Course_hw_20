@@ -27,6 +27,8 @@ public class AuthFilter extends UsernamePasswordAuthenticationFilter {
         this.jwtService = jwtService;
     }
 
+
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         final String username = request.getParameter("username");

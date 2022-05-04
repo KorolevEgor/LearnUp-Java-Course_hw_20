@@ -13,12 +13,19 @@ import java.util.Map;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
-    private final Map<String, UserDetails> storage = new HashMap<>() {{
-            put("user", new User(
+    private final Map<String, UserDetails> storage;
+
+    public UserRepositoryImpl() {
+        storage = new HashMap<>();
+        storage.put("user", new User(
                     "user",
                     new BCryptPasswordEncoder().encode("user123"),
-                    Collections.singletonList(new SimpleGrantedAuthority("USER"))));
-    }};
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
+        storage.put("admin", new User(
+                    "admin",
+                    new BCryptPasswordEncoder().encode("admin123"),
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+    }
 
     @Override
     public UserDetails get(String username) {

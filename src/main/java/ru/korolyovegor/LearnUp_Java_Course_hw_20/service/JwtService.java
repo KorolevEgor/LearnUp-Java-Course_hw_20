@@ -6,11 +6,16 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.repository.JwtRepository;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +50,7 @@ public class JwtService {
                 .withIssuer(issuer)
                 .withClaim("roles", roles)
                 .withExpiresAt(
-                        new Date(System.currentTimeMillis() + ACCESS_TIMEOUT)
+                        new Date(System.currentTimeMillis() + ACCESS_TIMEOUT * 1000)
                 )
                 .sign(algo);
     }
@@ -55,7 +60,7 @@ public class JwtService {
                 .withSubject(user.getUsername())
                 .withIssuer(issuer)
                 .withExpiresAt(
-                        new Date(System.currentTimeMillis() + REFRESH_TIMEOUT)
+                        new Date(System.currentTimeMillis() + REFRESH_TIMEOUT * 1000)
                 )
                 .sign(algo);
 
@@ -71,6 +76,26 @@ public class JwtService {
             final String oldToken = jwtRepository.get(subject);
 
             return jwt.equals(oldToken);
+        } catch (Exception err) {
+            return false;
+        }
+    }
+
+    public boolean verify(String token) {
+        try {
+            final DecodedJWT decodedJWT = verifier.verify(token);
+            final String[] roleNames = decodedJWT.getClaim("roles").asArray(String.class);
+
+            final String username = decodedJWT.getSubject();
+            List<SimpleGrantedAuthority> roles = Arrays.stream(roleNames)
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+
+            final SecurityContext securityContext = SecurityContextHolder.getContext();
+            securityContext.setAuthentication(
+                    new UsernamePasswordAuthenticationToken(username, null, roles)
+            );
+            return true;
         } catch (Exception err) {
             return false;
         }

@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.annotation.IfRoleAdmin;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Ticket;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.dto.PremiereDto;
@@ -54,6 +55,7 @@ public class PremiereService {
         }
     }
 
+    @IfRoleAdmin
     @Transactional(
             timeout = 5
     )
@@ -69,6 +71,7 @@ public class PremiereService {
                 .seatsUsed(premiere.getSeatsUsed()).build());
     }
 
+    @IfRoleAdmin
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
             timeout = 5
@@ -88,6 +91,7 @@ public class PremiereService {
         premiereRepository.save(premiere);
     }
 
+    @IfRoleAdmin
     @Transactional(
             isolation = Isolation.REPEATABLE_READ
     )

@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.annotation.IfRoleAdmin;
+import ru.korolyovegor.LearnUp_Java_Course_hw_20.annotation.IfRoleUser;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Premiere;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.domain.Ticket;
 import ru.korolyovegor.LearnUp_Java_Course_hw_20.dto.TicketDto;
@@ -56,6 +58,7 @@ public class TicketService {
         premiereService = context.getBean(PremiereService.class);
     }
 
+    @IfRoleAdmin
     @Transactional(
             timeout = 5
     )
@@ -74,6 +77,7 @@ public class TicketService {
         premiere.setSeatsUsed(premiere.getSeatsUsed() + 1);
     }
 
+    @IfRoleAdmin
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
             timeout = 5
@@ -90,6 +94,7 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
+    @IfRoleAdmin
     @Transactional(
             isolation = Isolation.REPEATABLE_READ
     )
@@ -105,6 +110,7 @@ public class TicketService {
         ticketMap.remove(id);
     }
 
+    @IfRoleAdmin
     @Transactional
     public List<TicketDto> getAllTickets() {
         List<TicketDto> ticketDtoList = new ArrayList<>();
@@ -114,12 +120,14 @@ public class TicketService {
         return ticketDtoList;
     }
 
+    @IfRoleAdmin
     @Transactional
     public TicketDto getTicketById(UUID id) {
         TicketEntity ticketEntity = ticketRepository.findById(id).get();
         return mapper.toDto(ticketEntity, ticketRepository);
     }
 
+    @IfRoleUser
     @Transactional
     public TicketEntity buyTicket(@org.jetbrains.annotations.NotNull PremiereEntity premiereBuy) {
         TicketEntity t = null;
@@ -145,6 +153,7 @@ public class TicketService {
         return t;
     }
 
+    @IfRoleUser
     @Transactional
     public void refundTicket(@org.jetbrains.annotations.NotNull PremiereEntity premiereRefund) {
         UUID id = premiereRefund.getId();
